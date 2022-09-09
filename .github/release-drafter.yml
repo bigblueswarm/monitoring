@@ -35,7 +35,7 @@ autolabeler:
   - label: 'chore'
     branch:
       - '/chore\/.+/'
-  - label: 'doc'
+  - label: 'documentation'
     branch:
       - '/doc\/.+/'
       - '/documentation\/.+/'
