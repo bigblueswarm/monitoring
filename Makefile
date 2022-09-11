@@ -5,6 +5,14 @@ SHELL := /bin/bash
 help:
 	@grep -E '[a-zA-Z\.\-]+:.*?@ .*$$' $(MAKEFILE_LIST)| tr -d '#'  | awk 'BEGIN {FS = ":.*?@ "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+#build: @ build artifact
+build:
+	@yarn build && go generate pkg/app/server.go && go build cmd/monitoring/main.go
+
+#clean: @ clean builds and statics
+clean:
+	@rm -rf main dist pkg/app/dist .cache .parcel-cache
+
 #init: @ install project and init dependencies
 init:
 	@echo "[INIT] Install project and init dependencies"

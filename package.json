@@ -1,7 +1,26 @@
 {
+  "name": "monitoring",
+  "version": "1.0.0",
+  "default": "web/index.html",
+  "repository": "https://github.com/b3lb/monitoring",
+  "author": "LEDUNOIS Simon <simon.ledunois@gmail.com>",
+  "license": "GPL3.0",
+  "scripts": {
+    "serve": "yarn parcel serve web/index.html",
+    "build": "yarn parcel build web/index.html --public-url /public/dist"
+  },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-conventional": "^17.1.0",
-    "husky": "^8.0.1"
+    "@types/react": "^18.0.18",
+    "@types/react-dom": "^18.0.6",
+    "husky": "^8.0.1",
+    "parcel": "^2.7.0",
+    "process": "^0.11.10",
+    "typescript": "^4.8.3"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }
