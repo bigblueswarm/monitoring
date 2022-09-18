@@ -1,3 +1,4 @@
+// Package app provide the main application package
 package app
 
 import (
@@ -5,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/b3lb/monitoring/pkg/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,22 +14,18 @@ import (
 //go:embed dist
 var dist embed.FS
 
-// Server represents the monitoring web server struct
-type Server struct {
-	Router *gin.Engine
-}
-
 // NewServer initialize a new web server
-func NewServer() *Server {
+func NewServer(config *config.Config) *Server {
 	return &Server{
 		Router: gin.Default(),
+		Config: config,
 	}
 }
 
 // Run launch the Server web application
 func (s *Server) Run() error {
 	s.initRoutes()
-	err := s.Router.Run(fmt.Sprintf(":8080"))
+	err := s.Router.Run(fmt.Sprintf(":%d", s.Config.Monitoring.Port))
 
 	if err != nil {
 		return err

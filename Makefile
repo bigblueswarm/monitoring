@@ -9,9 +9,20 @@ help:
 build:
 	@yarn build && go generate pkg/app/server.go && go build cmd/monitoring/main.go
 
+#test.unit: @ run unit tests and coverage
+test.unit:
+	@echo "[TEST.UNIT] run unit tests and coverage"
+	go test -race -covermode=atomic -coverprofile=coverage.out \
+		github.com/b3lb/monitoring/pkg/config
+
 #clean: @ clean builds and statics
 clean:
 	@rm -rf main dist pkg/app/dist .cache .parcel-cache
+
+#scripts: @ download scripts
+scripts:
+	@echo "[SCRIPTS] install b3lb scripts"
+	git clone https://github.com/b3lb/b3lb-scripts scripts
 
 #init: @ install project and init dependencies
 init:
@@ -49,3 +60,7 @@ cluster.telegraf:
 #cluster.consul: @ start development cluster using consul coniguration provider
 cluster.consul:
 	@make -f ./scripts/Makefile cluster.consul
+
+#cluster.b3lb: @ sta^rt development cluster using b3lb image
+cluster.b3lb:
+	@make -f ./scripts/Makefile cluster.b3lb
