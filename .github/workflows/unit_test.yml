@@ -6,6 +6,8 @@ jobs:
     name: Unit tests
     steps:
       - uses: actions/checkout@v2
+      - name: Get b3lb scripts
+        run: make scripts
       - name: Run test and coverage
         run: make test.unit
       - name: Send code coverage
