@@ -9,11 +9,19 @@ help:
 build:
 	@yarn build && go generate pkg/app/server.go && go build cmd/monitoring/main.go
 
+#build.front: @ build front with parcel and run go generate
+build.front:
+	@yarn build && go generate pkg/app/server.go
+
 #test.unit: @ run unit tests and coverage
 test.unit:
+	npm i
+	make build.front
 	@echo "[TEST.UNIT] run unit tests and coverage"
 	go test -race -covermode=atomic -coverprofile=coverage.out \
-		github.com/b3lb/monitoring/pkg/config
+		github.com/b3lb/monitoring/pkg/config \
+		github.com/b3lb/monitoring/pkg/auth \
+		github.com/b3lb/monitoring/pkg/app \
 
 #clean: @ clean builds and statics
 clean:

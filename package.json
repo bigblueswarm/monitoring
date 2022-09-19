@@ -7,7 +7,7 @@
   "license": "GPL3.0",
   "scripts": {
     "serve": "yarn parcel serve web/index.html",
-    "build": "yarn parcel build web/index.html --public-url /public/dist"
+    "build": "yarn parcel build 'web/*.html' --public-url /public/dist"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
@@ -20,6 +20,7 @@
     "typescript": "^4.8.3"
   },
   "dependencies": {
+    "@tabler/core": "^1.0.0-beta11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }
