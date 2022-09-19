@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../node_modules/@tabler/core/dist/css/tabler.min.css">
+    <title>b3lb - monitoring</title>
+</head>
+
+<body class="d-flex flex-column">
+    <div class="page page-center">
+        <div class="container-tight py-4">
+            <div class="card card-md">
+                <div class="card-body text-center py-4">
+                    <img src="./statics/images/light.logo.svg" height="64" alt="">
+                    <h1 class="mt-4">Welcome to b3lb monitoring application!</h1>
+                    <p class="text-muted">Sign in to monitor your BigBlueButton cluster.</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger d-none" id="invalid_pwd" role="alert">
+                        <h4 class="alert-title">I'm so sorry&hellip;</h4>
+                        <div class="text-muted">You enter an invalid password. Please retry.</div>
+                    </div>
+                    <form method="POST" action="/auth/login">
+                        <div class="mb-3">
+                            <div>
+                                <label class="form-label">
+                                    Password
+                                </label>
+                                <div class="input-group input-group-flat">
+                                    <input type="password" name="pwd" class="form-control" placeholder="Your password"
+                                        autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="form-footer">
+                                <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        if (window.location.search.includes("msg=") && window.location.search.includes("msg=invalid_pwd")) {
+            document.getElementById("invalid_pwd").classList.toggle("d-none");
+        }
+    </script>
+</body>
+
+</html>

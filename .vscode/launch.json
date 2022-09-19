@@ -23,7 +23,7 @@
             "program": "cmd/monitoring/main.go",
             "args": [
                 "-config",
-                "consul:127.0.0.1:8500"
+                "consul:https://sledunois-b3lb-b3lb-scripts-xvxxx4q4gwh9p99-8500.githubpreview.dev"
             ]
         }
     ]
