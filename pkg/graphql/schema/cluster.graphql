@@ -1,0 +1,8 @@
+# ActiveUserGauge represents the active users in the cluster
+type ActiveUserGauge {
+    value: Int
+}
+
+type Query {
+    activeUsers: ActiveUserGauge
+}
