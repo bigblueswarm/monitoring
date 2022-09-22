@@ -21,7 +21,8 @@ test.unit:
 	go test -race -covermode=atomic -coverprofile=coverage.out \
 		github.com/b3lb/monitoring/pkg/config \
 		github.com/b3lb/monitoring/pkg/auth \
-		github.com/b3lb/monitoring/pkg/app \
+		github.com/b3lb/monitoring/pkg/app
+	npm test
 
 #clean: @ clean builds and statics
 clean:

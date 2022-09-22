@@ -21,3 +21,4 @@ scripts
 dist
 pkg/app/statics
 .cache
+coverage

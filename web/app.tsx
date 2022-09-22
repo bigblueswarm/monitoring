@@ -1,3 +1,5 @@
-import React from "react";
+import React, { FunctionComponent } from 'react'
 
-export const App = () => <h1>Hello world</h1>;
+import { Layout } from './components/layout/layout'
+
+export const App: FunctionComponent = () => <Layout />
