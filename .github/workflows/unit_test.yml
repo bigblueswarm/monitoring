@@ -10,6 +10,9 @@ jobs:
         run: make scripts
       - name: Run test and coverage
         run: make test.unit
-      - name: Send code coverage
+      - name: Send Go code coverage
         if: github.ref == 'refs/heads/main'
         run: CODACY_PROJECT_TOKEN=${{ secrets.CODACY_PROJECT_TOKEN }} bash <(curl -Ls https://coverage.codacy.com/get.sh) report --force-coverage-parser go -r coverage.out
+      - name: Send Typescript code coverage
+        if: github.ref == 'refs/heads/main'
+        run: CODACY_PROJECT_TOKEN=${{ secrets.CODACY_PROJECT_TOKEN }} bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage/lcov.info
