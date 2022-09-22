@@ -13,6 +13,10 @@ build:
 build.front:
 	@yarn build && go generate pkg/app/server.go
 
+#graphql.generate: @ generate graphql model and resolvers
+graphql.generate:
+	go run github.com/99designs/gqlgen generate
+
 #test.unit: @ run unit tests and coverage
 test.unit:
 	npm i

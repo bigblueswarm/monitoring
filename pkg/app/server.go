@@ -6,10 +6,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/b3lb/monitoring/pkg/auth"
 	"github.com/b3lb/monitoring/pkg/config"
+	"github.com/b3lb/monitoring/pkg/graphql"
+	"github.com/b3lb/monitoring/pkg/graphql/generated"
+	"github.com/b3lb/monitoring/pkg/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
 //go:generate cp -r ../../dist ./dist
@@ -24,14 +30,43 @@ func newRedisClient(address string, password string, db int) *redis.Client {
 	})
 }
 
+func newInfluxDBClient(address string, token string) influxdb2.Client {
+	return influxdb2.NewClient(address, token)
+}
+
+// Defining the Graphql handler
+func (s *Server) graphqlHandler() gin.HandlerFunc {
+	// NewExecutableSchema and Config are in the generated.go file
+	// Resolver is in the resolver.go file
+	resolvers := &graphql.Resolver{
+		ClusterService: s.clusterService,
+	}
+	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+// Defining the Playground handler
+func playgroundHandler() gin.HandlerFunc {
+	h := playground.Handler("GraphQL", "/query")
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
 // NewServer initialize a new web server
 func NewServer(config *config.Config) *Server {
 	rc := newRedisClient(config.RDB.Address, config.RDB.Password, config.RDB.DB)
+	ic := newInfluxDBClient(config.IDB.Address, config.IDB.Token)
 
 	return &Server{
-		Router:       gin.Default(),
-		Config:       config,
-		AuthProvider: auth.NewProvider(rc, *config.Monitoring.Auth),
+		Router:         gin.Default(),
+		Config:         config,
+		AuthProvider:   auth.NewProvider(rc, *config.Monitoring.Auth),
+		clusterService: service.NewClusterService(ic, config.IDB.Organization, config.IDB.Bucket),
 	}
 }
 
@@ -50,6 +85,8 @@ func (s *Server) Run() error {
 
 func (s *Server) initRoutes() {
 	s.Router.StaticFS("/public", http.FS(dist))
+	s.Router.POST("/query", s.graphqlHandler())
+	s.Router.GET("/graphiql", playgroundHandler())
 	auth := s.Router.Group("/auth")
 	{
 		auth.GET("/login", loginPage)
