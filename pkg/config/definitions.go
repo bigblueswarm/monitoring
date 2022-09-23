@@ -15,6 +15,7 @@ type Port int
 
 // MonitoringConfig is the global monitoring application config
 type MonitoringConfig struct {
-	Auth *string `yaml:"auth"`
-	Port Port    `yaml:"port"`
+	Auth                *string `yaml:"auth"`
+	Port                Port    `yaml:"port"`
+	AggregationInterval *string `yaml:"aggregation_interval"`
 }

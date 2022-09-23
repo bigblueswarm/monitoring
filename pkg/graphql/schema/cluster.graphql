@@ -1,8 +1,11 @@
-# ActiveUserGauge represents the active users in the cluster
-type ActiveUserGauge {
-    value: Int
+# ActiveUsersStats represents the active user card in overview graph
+type ActiveUsersStat {
+    Gauge: Gauge
+    Trend: Trend
+    Sparkline: [Point]
 }
 
+# Cluster query manage 
 type Query {
-    activeUsers: ActiveUserGauge
+    activeUsers(start: String, stop: String, every: String): ActiveUsersStat
 }

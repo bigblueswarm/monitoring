@@ -8,7 +8,8 @@
   "scripts": {
     "serve": "yarn parcel serve web/index.html",
     "build": "yarn parcel build 'web/*.html' --public-url /public/dist",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
   },
   "husky": {
     "hooks": {
@@ -46,8 +47,12 @@
     "typescript": "*"
   },
   "dependencies": {
+    "@apollo/client": "^3.6.9",
     "@tabler/core": "^1.0.0-beta11",
+    "apexcharts": "^3.35.5",
+    "graphql": "^16.6.0",
     "react": "^18.2.0",
+    "react-apexcharts": "^1.4.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.4.0"
   }

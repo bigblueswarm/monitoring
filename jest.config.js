@@ -16,5 +16,8 @@ module.exports = {
     'jsx',
     'json',
     'node'
+  ],
+  setupFiles: [
+    './jest.setup.tsx'
   ]
 }

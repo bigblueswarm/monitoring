@@ -66,7 +66,7 @@ func NewServer(config *config.Config) *Server {
 		Router:         gin.Default(),
 		Config:         config,
 		AuthProvider:   auth.NewProvider(rc, *config.Monitoring.Auth),
-		clusterService: service.NewClusterService(ic, config.IDB.Organization, config.IDB.Bucket),
+		clusterService: service.NewClusterService(ic, config.IDB.Organization, config.IDB.Bucket, *config.Monitoring.AggregationInterval),
 	}
 }
 
@@ -85,8 +85,6 @@ func (s *Server) Run() error {
 
 func (s *Server) initRoutes() {
 	s.Router.StaticFS("/public", http.FS(dist))
-	s.Router.POST("/query", s.graphqlHandler())
-	s.Router.GET("/graphiql", playgroundHandler())
 	auth := s.Router.Group("/auth")
 	{
 		auth.GET("/login", loginPage)
@@ -94,6 +92,8 @@ func (s *Server) initRoutes() {
 		auth.GET("/logout", s.logoutHandler)
 	}
 	s.Router.Use(s.authHandler)
+	s.Router.POST("/query", s.graphqlHandler())
+	s.Router.GET("/graphiql", playgroundHandler())
 	s.Router.GET("/", getIndex)
 	s.Router.GET("/api", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Hello from api")

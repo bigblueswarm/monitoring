@@ -2,6 +2,21 @@
 
 package model
 
-type ActiveUserGauge struct {
-	Value *int `json:"value"`
+type ActiveUsersStat struct {
+	Gauge     *Gauge   `json:"Gauge"`
+	Trend     *Trend   `json:"Trend"`
+	Sparkline []*Point `json:"Sparkline"`
+}
+
+type Gauge struct {
+	Value *float64 `json:"value"`
+}
+
+type Point struct {
+	Value *float64 `json:"value"`
+	Time  *string  `json:"time"`
+}
+
+type Trend struct {
+	Value *float64 `json:"value"`
 }
