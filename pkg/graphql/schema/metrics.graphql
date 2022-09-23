@@ -1,0 +1,15 @@
+# Gauge represents a value metric
+type Gauge {
+    value: Float
+}
+
+# Trend represents a trend value
+type Trend {
+    value: Float
+}
+
+# Point represents a timeserie point
+type Point {
+    value: Float
+    time: String 
+}

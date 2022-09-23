@@ -1,0 +1,4 @@
+exclude_paths:
+  - "pkg/model/*"
+  - "pkg/graphql/generated/*"
+  - "pkg/graphql/*.resolvers.go"

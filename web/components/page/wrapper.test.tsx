@@ -1,10 +1,8 @@
 import React from 'react'
 import { render } from '@testing-library/react'
 
-import { Layout } from './layout'
+import { Wrapper } from './wrapper'
 
 test('it should render without error', () => {
-  render(
-        <Layout />
-  )
+  render(<Wrapper />)
 })

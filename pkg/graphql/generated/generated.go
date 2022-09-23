@@ -42,17 +42,32 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	ActiveUserGauge struct {
+	ActiveUsersStat struct {
+		Gauge     func(childComplexity int) int
+		Sparkline func(childComplexity int) int
+		Trend     func(childComplexity int) int
+	}
+
+	Gauge struct {
+		Value func(childComplexity int) int
+	}
+
+	Point struct {
+		Time  func(childComplexity int) int
 		Value func(childComplexity int) int
 	}
 
 	Query struct {
-		ActiveUsers func(childComplexity int) int
+		ActiveUsers func(childComplexity int, start *string, stop *string, every *string) int
+	}
+
+	Trend struct {
+		Value func(childComplexity int) int
 	}
 }
 
 type QueryResolver interface {
-	ActiveUsers(ctx context.Context) (*model.ActiveUserGauge, error)
+	ActiveUsers(ctx context.Context, start *string, stop *string, every *string) (*model.ActiveUsersStat, error)
 }
 
 type executableSchema struct {
@@ -70,19 +85,66 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "ActiveUserGauge.value":
-		if e.complexity.ActiveUserGauge.Value == nil {
+	case "ActiveUsersStat.Gauge":
+		if e.complexity.ActiveUsersStat.Gauge == nil {
 			break
 		}
 
-		return e.complexity.ActiveUserGauge.Value(childComplexity), true
+		return e.complexity.ActiveUsersStat.Gauge(childComplexity), true
+
+	case "ActiveUsersStat.Sparkline":
+		if e.complexity.ActiveUsersStat.Sparkline == nil {
+			break
+		}
+
+		return e.complexity.ActiveUsersStat.Sparkline(childComplexity), true
+
+	case "ActiveUsersStat.Trend":
+		if e.complexity.ActiveUsersStat.Trend == nil {
+			break
+		}
+
+		return e.complexity.ActiveUsersStat.Trend(childComplexity), true
+
+	case "Gauge.value":
+		if e.complexity.Gauge.Value == nil {
+			break
+		}
+
+		return e.complexity.Gauge.Value(childComplexity), true
+
+	case "Point.time":
+		if e.complexity.Point.Time == nil {
+			break
+		}
+
+		return e.complexity.Point.Time(childComplexity), true
+
+	case "Point.value":
+		if e.complexity.Point.Value == nil {
+			break
+		}
+
+		return e.complexity.Point.Value(childComplexity), true
 
 	case "Query.activeUsers":
 		if e.complexity.Query.ActiveUsers == nil {
 			break
 		}
 
-		return e.complexity.Query.ActiveUsers(childComplexity), true
+		args, err := ec.field_Query_activeUsers_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ActiveUsers(childComplexity, args["start"].(*string), args["stop"].(*string), args["every"].(*string)), true
+
+	case "Trend.value":
+		if e.complexity.Trend.Value == nil {
+			break
+		}
+
+		return e.complexity.Trend.Value(childComplexity), true
 
 	}
 	return 0, false
@@ -136,13 +198,31 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema/cluster.graphql", Input: `# ActiveUserGauge represents the active users in the cluster
-type ActiveUserGauge {
-    value: Int
+	{Name: "../schema/cluster.graphql", Input: `# ActiveUsersStats represents the active user card in overview graph
+type ActiveUsersStat {
+    Gauge: Gauge
+    Trend: Trend
+    Sparkline: [Point]
 }
 
+# Cluster query manage 
 type Query {
-    activeUsers: ActiveUserGauge
+    activeUsers(start: String, stop: String, every: String): ActiveUsersStat
+}`, BuiltIn: false},
+	{Name: "../schema/metrics.graphql", Input: `# Gauge represents a value metric
+type Gauge {
+    value: Float
+}
+
+# Trend represents a trend value
+type Trend {
+    value: Float
+}
+
+# Point represents a timeserie point
+type Point {
+    value: Float
+    time: String 
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -163,6 +243,39 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_activeUsers_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["start"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["start"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["stop"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stop"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["stop"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["every"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("every"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["every"] = arg2
 	return args, nil
 }
 
@@ -204,8 +317,145 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _ActiveUserGauge_value(ctx context.Context, field graphql.CollectedField, obj *model.ActiveUserGauge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ActiveUserGauge_value(ctx, field)
+func (ec *executionContext) _ActiveUsersStat_Gauge(ctx context.Context, field graphql.CollectedField, obj *model.ActiveUsersStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ActiveUsersStat_Gauge(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Gauge, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Gauge)
+	fc.Result = res
+	return ec.marshalOGauge2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐGauge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ActiveUsersStat_Gauge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ActiveUsersStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "value":
+				return ec.fieldContext_Gauge_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Gauge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ActiveUsersStat_Trend(ctx context.Context, field graphql.CollectedField, obj *model.ActiveUsersStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ActiveUsersStat_Trend(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Trend, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Trend)
+	fc.Result = res
+	return ec.marshalOTrend2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐTrend(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ActiveUsersStat_Trend(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ActiveUsersStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "value":
+				return ec.fieldContext_Trend_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Trend", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ActiveUsersStat_Sparkline(ctx context.Context, field graphql.CollectedField, obj *model.ActiveUsersStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ActiveUsersStat_Sparkline(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Sparkline, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Point)
+	fc.Result = res
+	return ec.marshalOPoint2ᚕᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ActiveUsersStat_Sparkline(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ActiveUsersStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "value":
+				return ec.fieldContext_Point_value(ctx, field)
+			case "time":
+				return ec.fieldContext_Point_time(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Point", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Gauge_value(ctx context.Context, field graphql.CollectedField, obj *model.Gauge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Gauge_value(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -227,19 +477,101 @@ func (ec *executionContext) _ActiveUserGauge_value(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ActiveUserGauge_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Gauge_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ActiveUserGauge",
+		Object:     "Gauge",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Point_value(ctx context.Context, field graphql.CollectedField, obj *model.Point) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Point_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Point_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Point",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Point_time(ctx context.Context, field graphql.CollectedField, obj *model.Point) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Point_time(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Time, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Point_time(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Point",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -259,7 +591,7 @@ func (ec *executionContext) _Query_activeUsers(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ActiveUsers(rctx)
+		return ec.resolvers.Query().ActiveUsers(rctx, fc.Args["start"].(*string), fc.Args["stop"].(*string), fc.Args["every"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -268,9 +600,9 @@ func (ec *executionContext) _Query_activeUsers(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.ActiveUserGauge)
+	res := resTmp.(*model.ActiveUsersStat)
 	fc.Result = res
-	return ec.marshalOActiveUserGauge2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐActiveUserGauge(ctx, field.Selections, res)
+	return ec.marshalOActiveUsersStat2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐActiveUsersStat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_activeUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -281,11 +613,26 @@ func (ec *executionContext) fieldContext_Query_activeUsers(ctx context.Context, 
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "value":
-				return ec.fieldContext_ActiveUserGauge_value(ctx, field)
+			case "Gauge":
+				return ec.fieldContext_ActiveUsersStat_Gauge(ctx, field)
+			case "Trend":
+				return ec.fieldContext_ActiveUsersStat_Trend(ctx, field)
+			case "Sparkline":
+				return ec.fieldContext_ActiveUsersStat_Sparkline(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ActiveUserGauge", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type ActiveUsersStat", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_activeUsers_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -414,6 +761,47 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Trend_value(ctx context.Context, field graphql.CollectedField, obj *model.Trend) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Trend_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Trend_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Trend",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2200,19 +2588,81 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** object.gotpl ****************************
 
-var activeUserGaugeImplementors = []string{"ActiveUserGauge"}
+var activeUsersStatImplementors = []string{"ActiveUsersStat"}
 
-func (ec *executionContext) _ActiveUserGauge(ctx context.Context, sel ast.SelectionSet, obj *model.ActiveUserGauge) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, activeUserGaugeImplementors)
+func (ec *executionContext) _ActiveUsersStat(ctx context.Context, sel ast.SelectionSet, obj *model.ActiveUsersStat) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, activeUsersStatImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("ActiveUserGauge")
+			out.Values[i] = graphql.MarshalString("ActiveUsersStat")
+		case "Gauge":
+
+			out.Values[i] = ec._ActiveUsersStat_Gauge(ctx, field, obj)
+
+		case "Trend":
+
+			out.Values[i] = ec._ActiveUsersStat_Trend(ctx, field, obj)
+
+		case "Sparkline":
+
+			out.Values[i] = ec._ActiveUsersStat_Sparkline(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var gaugeImplementors = []string{"Gauge"}
+
+func (ec *executionContext) _Gauge(ctx context.Context, sel ast.SelectionSet, obj *model.Gauge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, gaugeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Gauge")
 		case "value":
 
-			out.Values[i] = ec._ActiveUserGauge_value(ctx, field, obj)
+			out.Values[i] = ec._Gauge_value(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var pointImplementors = []string{"Point"}
+
+func (ec *executionContext) _Point(ctx context.Context, sel ast.SelectionSet, obj *model.Point) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pointImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Point")
+		case "value":
+
+			out.Values[i] = ec._Point_value(ctx, field, obj)
+
+		case "time":
+
+			out.Values[i] = ec._Point_time(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -2275,6 +2725,31 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var trendImplementors = []string{"Trend"}
+
+func (ec *executionContext) _Trend(ctx context.Context, sel ast.SelectionSet, obj *model.Trend) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, trendImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Trend")
+		case "value":
+
+			out.Values[i] = ec._Trend_value(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -2888,11 +3363,11 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOActiveUserGauge2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐActiveUserGauge(ctx context.Context, sel ast.SelectionSet, v *model.ActiveUserGauge) graphql.Marshaler {
+func (ec *executionContext) marshalOActiveUsersStat2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐActiveUsersStat(ctx context.Context, sel ast.SelectionSet, v *model.ActiveUsersStat) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._ActiveUserGauge(ctx, sel, v)
+	return ec._ActiveUsersStat(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -2921,20 +3396,75 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := graphql.UnmarshalInt(v)
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	res := graphql.MarshalInt(*v)
-	return res
+	res := graphql.MarshalFloatContext(*v)
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
+func (ec *executionContext) marshalOGauge2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐGauge(ctx context.Context, sel ast.SelectionSet, v *model.Gauge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Gauge(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPoint2ᚕᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v []*model.Point) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPoint2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOPoint2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v *model.Point) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Point(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
@@ -2951,6 +3481,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOTrend2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐTrend(ctx context.Context, sel ast.SelectionSet, v *model.Trend) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Trend(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

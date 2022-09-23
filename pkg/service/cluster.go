@@ -2,35 +2,32 @@
 package service
 
 import (
-	"context"
-
 	"github.com/b3lb/monitoring/pkg/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
 // NewClusterService instantiate a new ClusterService object
-func NewClusterService(idb influxdb2.Client, org string, b string) IClusterService {
+func NewClusterService(idb influxdb2.Client, org string, b string, a string) IClusterService {
 	return &ClusterService{
-		client: idb.QueryAPI(org),
-		bucket: b,
+		Service: Service{
+			client: idb.QueryAPI(org),
+			bucket: b,
+			aggregationInterval: a,
+		},
 	}
 }
 
 // GetUserCount retrieve active users count
-func (c *ClusterService) GetUserCount() (*model.ActiveUserGauge, error) {
-	q := `
-	from(bucket: "bucket")
-		|> range(start: 0)
-		|> filter(fn: (r) => r["_measurement"] == "bigbluebutton_meetings")
-		|> filter(fn: (r) => r["_field"] == "participant_count")
-		|> group(columns: ["_time", "_measurement"], mode:"by")
-		|> last(column: "_time")
-		|> yield(name: "sum")
-	`
+func (c *ClusterService) GetUserCount() (*model.Gauge, error) {
+	return c.getGaugeValue(bigbluebuttonMeetings, participantCount)
+}
 
-	c.client.Query(context.Background(), q)
-	val := 123
-	return &model.ActiveUserGauge{
-		Value: &val,
-	}, nil
+// GetUserTimeserie retrieve active users in the cluster as a timeserie
+func (c *ClusterService) GetUserTimeserie(start string, stop string, every string) ([]*model.Point, error) {
+	return c.getTimeserie(bigbluebuttonMeetings, participantCount, start, stop, every)
+}
+
+// GetUserTrend retrive active users trend in the cluster
+func (c *ClusterService) GetUserTrend(start string, stop string, every string) (*model.Trend, error) {
+	return c.getTrend(bigbluebuttonMeetings, participantCount, start, stop, every)
 }
