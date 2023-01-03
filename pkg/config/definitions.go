@@ -1,7 +1,7 @@
 // Package config provides the configuration loading
 package config
 
-import "github.com/SLedunois/b3lb/v2/pkg/config"
+import "github.com/bigblueswarm/bigblueswarm/v2/pkg/config"
 
 // Config is the global application config
 type Config struct {

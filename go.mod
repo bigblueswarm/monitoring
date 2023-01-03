@@ -1,10 +1,11 @@
-module github.com/b3lb/monitoring
+module github.com/bigblueswarm/monitoring
 
 go 1.19
 
 require (
 	github.com/99designs/gqlgen v0.17.20
-	github.com/SLedunois/b3lb/v2 v2.1.2
+	github.com/bigblueswarm/bigblueswarm/v2 v2.2.1
+	github.com/bigblueswarm/test_utils v0.0.0-20221130142439-0fd13167b78a
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redis/redismock/v8 v8.0.6
@@ -34,7 +35,6 @@ require (
 )
 
 require (
-	github.com/b3lb/test_utils v0.0.0-20220918193343-b04e283e9a4c
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 )

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/b3lb/monitoring/pkg/auth"
-	"github.com/b3lb/test_utils/pkg/request"
-	"github.com/b3lb/test_utils/pkg/test"
+	"github.com/bigblueswarm/monitoring/pkg/auth"
+	"github.com/bigblueswarm/test_utils/pkg/request"
+	"github.com/bigblueswarm/test_utils/pkg/test"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

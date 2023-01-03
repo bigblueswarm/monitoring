@@ -1,7 +1,7 @@
 // Package graphql manage graphql api
 package graphql
 
-import "github.com/b3lb/monitoring/pkg/service"
+import "github.com/bigblueswarm/monitoring/pkg/service"
 
 // This file will not be regenerated automatically.
 //

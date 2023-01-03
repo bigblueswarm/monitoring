@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/b3lb/monitoring/pkg/model"
-	"github.com/b3lb/monitoring/pkg/pointer"
-	"github.com/b3lb/test_utils/pkg/test"
+	"github.com/bigblueswarm/monitoring/pkg/model"
+	"github.com/bigblueswarm/monitoring/pkg/pointer"
+	"github.com/bigblueswarm/test_utils/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 

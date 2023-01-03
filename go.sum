@@ -1,8 +1,6 @@
 github.com/99designs/gqlgen v0.17.20 h1:O7WzccIhKB1dm+7g6dhQcULINftfiLSBg2l/mwbpJMw=
 github.com/99designs/gqlgen v0.17.20/go.mod h1:Mja2HI23kWT1VRH09hvWshFgOzKswpO20o4ScpJIES4=
 github.com/BurntSushi/toml v1.1.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/SLedunois/b3lb/v2 v2.1.2 h1:a1eyez/O8AWt7MATAyYgqEQQfruziykdWo+aVozfu8w=
-github.com/SLedunois/b3lb/v2 v2.1.2/go.mod h1:eV8aarJfifXTPO+ib4iF8DBDdGTMSzjWUp8lQO6T1g0=
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=
 github.com/agnivade/levenshtein v1.1.1 h1:QY8M92nrzkmr798gCo3kmMyqXFzdQVpxLlGPRBij0P8=
 github.com/agnivade/levenshtein v1.1.1/go.mod h1:veldBMzWxcCG2ZvUTKD2kJNRdCk5hVbJomOvKkmgYbo=
@@ -15,9 +13,13 @@ github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da h1:8GUt8eRujhVEGZ
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmVTwzkszR9V5SSuryQ31EELlFMUz1kKyl939pY=
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
-github.com/b3lb/test_utils v0.0.0-20220918193343-b04e283e9a4c h1:51D87z9y5yQReb+FQXWKdRaWi2ZgYQFb43C55atVDjI=
-github.com/b3lb/test_utils v0.0.0-20220918193343-b04e283e9a4c/go.mod h1:4K0Z6JUms/Yym3ugU7IC8XCKbbn/HHpzciDgXjtA77Y=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
+github.com/bigblueswarm/bigblueswarm/v2 v2.2.0 h1:c12tRtY5kl3F3Y6gY0W51fuNHgJ8K3LXzZOJPbCdkCs=
+github.com/bigblueswarm/bigblueswarm/v2 v2.2.0/go.mod h1:MgUKXAMzQDSVwKLXI8Y/DHgBAtkvBuCv1FzSkZ1o0wg=
+github.com/bigblueswarm/bigblueswarm/v2 v2.2.1 h1:4P/CfqvkJPBxc8v6GyOyqbrizNNYsuDqzJXoUjSzxmo=
+github.com/bigblueswarm/bigblueswarm/v2 v2.2.1/go.mod h1:MgUKXAMzQDSVwKLXI8Y/DHgBAtkvBuCv1FzSkZ1o0wg=
+github.com/bigblueswarm/test_utils v0.0.0-20221130142439-0fd13167b78a h1:xsrFuUx0wlTsEs0zJVmGcZfP2pP07AYGWZQdboF5sAU=
+github.com/bigblueswarm/test_utils v0.0.0-20221130142439-0fd13167b78a/go.mod h1:2sMgtUyhEll/OdKjAle0oj8mNMehoGGLY81l/u/DLHw=
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cespare/xxhash/v2 v2.1.2 h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=

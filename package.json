@@ -2,7 +2,7 @@
   "name": "monitoring",
   "version": "1.0.0",
   "default": "web/index.html",
-  "repository": "https://github.com/b3lb/monitoring",
+  "repository": "https://github.com/bigblueswarm/monitoring",
   "author": "LEDUNOIS Simon <simon.ledunois@gmail.com>",
   "license": "GPL3.0",
   "scripts": {

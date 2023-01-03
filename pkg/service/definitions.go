@@ -2,7 +2,7 @@
 package service
 
 import (
-	"github.com/b3lb/monitoring/pkg/model"
+	"github.com/bigblueswarm/monitoring/pkg/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2/api"
 )
 

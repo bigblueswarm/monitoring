@@ -19,15 +19,15 @@ graphql.generate:
 
 #test.unit: @ run unit tests and coverage
 test.unit:
-	npm i
+	npm ci
 	make build.front
 	@echo "[TEST.UNIT] run unit tests and coverage"
 	go test -race -covermode=atomic -coverprofile=coverage.out \
-		github.com/b3lb/monitoring/pkg/config \
-		github.com/b3lb/monitoring/pkg/auth \
-		github.com/b3lb/monitoring/pkg/app \
-		github.com/b3lb/monitoring/pkg/pointer \
-		github.com/b3lb/monitoring/pkg/service
+		github.com/bigblueswarm/monitoring/pkg/app \
+		github.com/bigblueswarm/monitoring/pkg/auth \
+		github.com/bigblueswarm/monitoring/pkg/config \
+		github.com/bigblueswarm/monitoring/pkg/pointer \
+		github.com/bigblueswarm/monitoring/pkg/service
 	npm test
 
 #clean: @ clean builds and statics
@@ -36,8 +36,8 @@ clean:
 
 #scripts: @ download scripts
 scripts:
-	@echo "[SCRIPTS] install b3lb scripts"
-	git clone https://github.com/b3lb/b3lb-scripts scripts
+	@echo "[SCRIPTS] install bigblueswarm scripts"
+	git clone https://github.com/bigblueswarm/bbs-scripts scripts
 
 #init: @ install project and init dependencies
 init:
@@ -51,7 +51,7 @@ init:
 	npx husky install
 	npx husky add .husky/commit-msg "npx --no -- commitlint --edit \"$1\""
 	@echo "[INIT][3/3] download development scripts"
-	git clone https://github.com/b3lb/b3lb-scripts scripts
+	git clone https://github.com/bigblueswarm/bbs-scripts scripts
 
 #cluster.init: @ initialize development cluster (initialize influxdb and telegraf)
 cluster.init: cluster.influxdb cluster.telegraf
@@ -76,6 +76,6 @@ cluster.telegraf:
 cluster.consul:
 	@make -f ./scripts/Makefile cluster.consul
 
-#cluster.b3lb: @ sta^rt development cluster using b3lb image
+#cluster.bigblueswarm: @ start development cluster using bigblueswarm image
 cluster.bigblueswarm:
 	@make -f ./scripts/Makefile cluster.bigblueswarm
