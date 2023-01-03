@@ -1,3 +1,4 @@
+// Package pointer provides utilities to transform a variable to a pointer, or initialize string to pointer
 package pointer
 
 // SPtr returns a pointer for the given string

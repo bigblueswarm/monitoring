@@ -1,3 +1,4 @@
+// Command monitoring launch the BigBlueSwarm monitoring application
 package main
 
 import (

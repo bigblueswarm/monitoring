@@ -10,12 +10,12 @@ import (
 )
 
 var idbResponse string
-var idbHttpStatus int
+var idbHTTPStatus int
 var csMock *ClusterService
 
 func TestMain(m *testing.M) {
 	influxDBServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		rw.WriteHeader(idbHttpStatus)
+		rw.WriteHeader(idbHTTPStatus)
 		rw.Header().Set("Content-Type", "application/csv")
 		rw.Write([]byte(idbResponse))
 	}))

@@ -1,3 +1,4 @@
+// Package service provides a simple service to interact with influxdb
 package service
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/influxdata/influxdb-client-go/v2/domain"
 )
 
+// InfluxDBQueryMock is a mock implementation that simulate a query to influxdb
 type InfluxDBQueryMock struct{}
 
 var (
@@ -21,7 +23,6 @@ func (i *InfluxDBQueryMock) QueryRaw(ctx context.Context, query string, dialect 
 }
 
 // QueryRawWithParams executes flux parametrized query on the InfluxDB server and returns complete query result as a string with table annotations according to dialect
-
 func (i *InfluxDBQueryMock) QueryRawWithParams(ctx context.Context, query string, dialect *domain.Dialect, params interface{}) (string, error) {
 	panic(errors.New("method has no implementation"))
 }

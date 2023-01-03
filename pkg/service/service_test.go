@@ -16,7 +16,7 @@ func TestGetGaugeValue(t *testing.T) {
 			Name: "an error returned by influxdb should return an error",
 			Mock: func() {
 				idbResponse = ``
-				idbHttpStatus = http.StatusInternalServerError
+				idbHTTPStatus = http.StatusInternalServerError
 			},
 			Validator: func(t *testing.T, value interface{}, err error) {
 				assert.Error(t, err)
@@ -26,7 +26,7 @@ func TestGetGaugeValue(t *testing.T) {
 			Name: "a empty response should return a gauge value equals to 0",
 			Mock: func() {
 				idbResponse = ``
-				idbHttpStatus = http.StatusOK
+				idbHTTPStatus = http.StatusOK
 			},
 			Validator: func(t *testing.T, value interface{}, err error) {
 				gauge := value.(*model.Gauge)
@@ -62,7 +62,7 @@ func TestGetTimeserie(t *testing.T) {
 			Name: "an error returned by influxdb should return an error",
 			Mock: func() {
 				idbResponse = ``
-				idbHttpStatus = http.StatusInternalServerError
+				idbHTTPStatus = http.StatusInternalServerError
 			},
 			Validator: func(t *testing.T, value interface{}, err error) {
 				assert.Error(t, err)
@@ -71,7 +71,7 @@ func TestGetTimeserie(t *testing.T) {
 		{
 			Name: "an empty response should return an empty points array",
 			Mock: func() {
-				idbHttpStatus = http.StatusOK
+				idbHTTPStatus = http.StatusOK
 			},
 			Validator: func(t *testing.T, value interface{}, err error) {
 				assert.Nil(t, err)
@@ -118,7 +118,7 @@ func TestGetTrend(t *testing.T) {
 			Name: "an error returned by influxdb should return an error",
 			Mock: func() {
 				idbResponse = ``
-				idbHttpStatus = http.StatusInternalServerError
+				idbHTTPStatus = http.StatusInternalServerError
 			},
 			Validator: func(t *testing.T, value interface{}, err error) {
 				assert.Error(t, err)
@@ -128,7 +128,7 @@ func TestGetTrend(t *testing.T) {
 			Name: "a empty response should return a trend value equals to 0",
 			Mock: func() {
 				idbResponse = ``
-				idbHttpStatus = http.StatusOK
+				idbHTTPStatus = http.StatusOK
 			},
 			Validator: func(t *testing.T, value interface{}, err error) {
 				gauge := value.(*model.Trend)
