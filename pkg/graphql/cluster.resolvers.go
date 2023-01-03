@@ -9,15 +9,10 @@ import (
 
 	"github.com/bigblueswarm/monitoring/pkg/graphql/generated"
 	"github.com/bigblueswarm/monitoring/pkg/model"
-	"github.com/bigblueswarm/monitoring/pkg/pointer"
 )
 
 // ActiveUsers is the resolver for the activeUsers field.
-func (r *queryResolver) ActiveUsers(ctx context.Context, start *string, stop *string, every *string) (*model.ActiveUsersStat, error) {
-	if every == (*string)(nil) {
-		every = pointer.SPtr("")
-	}
-
+func (r *queryResolver) ActiveUsers(ctx context.Context, start *string, stop *string) (*model.ActiveMetricStat, error) {
 	gauge, err := r.ClusterService.GetUserCount()
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve user count gauge: %s", err)
@@ -28,12 +23,36 @@ func (r *queryResolver) ActiveUsers(ctx context.Context, start *string, stop *st
 		return nil, fmt.Errorf("failed to retrieve user count sparkline: %s", err)
 	}
 
-	trend, err := r.ClusterService.GetUserTrend(*start, *stop, *every)
+	trend, err := r.ClusterService.GetUserTrend(*start, *stop, r.ClusterService.GetAggregationInterval())
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve user trend: %s", err)
 	}
 
-	return &model.ActiveUsersStat{
+	return &model.ActiveMetricStat{
+		Gauge:     gauge,
+		Trend:     trend,
+		Sparkline: sparkline,
+	}, nil
+}
+
+// ActiveMeetings is the resolver for the activeMeetings field.
+func (r *queryResolver) ActiveMeetings(ctx context.Context, start *string, stop *string) (*model.ActiveMetricStat, error) {
+	gauge, err := r.ClusterService.GetMeetingCount()
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve meeting count gauge: %s", err)
+	}
+
+	sparkline, err := r.ClusterService.GetMeetingTimeserie(*start, *stop, "45s")
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve meetings count sparkline: %s", err)
+	}
+
+	trend, err := r.ClusterService.GetMeetingTrend(*start, *stop, r.ClusterService.GetAggregationInterval())
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve meetings trend: %s", err)
+	}
+
+	return &model.ActiveMetricStat{
 		Gauge:     gauge,
 		Trend:     trend,
 		Sparkline: sparkline,

@@ -12,7 +12,7 @@
             "program": "cmd/monitoring/main.go",
             "args": [
                 "-config",
-                "/workspaces/monitoring/scripts/config.yml"
+                "../../scripts/config.yml"
             ]
         },
         {

@@ -31,3 +31,23 @@ func (c *ClusterService) GetUserTimeserie(start string, stop string, every strin
 func (c *ClusterService) GetUserTrend(start string, stop string, every string) (*model.Trend, error) {
 	return c.getTrend(bigbluebuttonMeetings, participantCount, start, stop, every)
 }
+
+// GetMeetingCount retrieve actives meetings in the cluster
+func (c *ClusterService) GetMeetingCount() (*model.Gauge, error) {
+	return c.getGaugeValue(bigbluebuttonMeetings, activeMeetings)
+}
+
+// GetMeetingTimeserie retrieve active meetings in the cluster as a timeserie
+func (c *ClusterService) GetMeetingTimeserie(start string, stop string, every string) ([]*model.Point, error) {
+	return c.getTimeserie(bigbluebuttonMeetings, activeMeetings, start, stop, every)
+}
+
+// GetMeetingTrend retrieve active meetings trend in the cluster
+func (c *ClusterService) GetMeetingTrend(start string, stop string, every string) (*model.Trend, error) {
+	return c.getTrend(bigbluebuttonMeetings, activeMeetings, start, stop, every)
+}
+
+// GetAggregationInterval returns the aggregation interval configured in balancer
+func (c *ClusterService) GetAggregationInterval() string {
+	return c.aggregationInterval
+}

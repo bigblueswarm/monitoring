@@ -1,5 +1,5 @@
-# ActiveUsersStats represents the active user card in overview graph
-type ActiveUsersStat {
+# ActiveMetricStat represents and active card in overview graph
+type ActiveMetricStat {
     Gauge: Gauge
     Trend: Trend
     Sparkline: [Point]
@@ -7,5 +7,6 @@ type ActiveUsersStat {
 
 # Cluster query manage 
 type Query {
-    activeUsers(start: String, stop: String, every: String): ActiveUsersStat
+    activeUsers(start: String, stop: String): ActiveMetricStat
+    activeMeetings(start: String, stop: String): ActiveMetricStat
 }

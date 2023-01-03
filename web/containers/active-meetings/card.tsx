@@ -6,17 +6,17 @@ import { Card } from '../../components/card'
 import { getColor } from '../../helper/color'
 import { Gauge, Point, Trend } from '../../types'
 
-interface IActiveUsers {
-  activeUsers: {
+interface IActiveMeetings {
+  activeMeetings: {
     Gauge: Gauge
     Trend: Trend
     Sparkline: Point[]
   }
 }
 
-const GET_ACTIVE_USERS = gql`
+const GET_ACTIVE_MEETINGS = gql`
     {
-        activeUsers(start: "-1h", stop: "now()") {
+        activeMeetings(start: "-1h", stop: "now()") {
             Gauge {
                 value
             }
@@ -32,17 +32,17 @@ const GET_ACTIVE_USERS = gql`
 `
 
 export const CardWithSparkline: FunctionComponent = () => {
-  const { data, loading } = useQuery<IActiveUsers>(GET_ACTIVE_USERS, {
+  const { data, loading } = useQuery<IActiveMeetings>(GET_ACTIVE_MEETINGS, {
     pollInterval: 10000,
     fetchPolicy: 'no-cache'
   })
 
   return <Card.DataWithSparkline
-    title='Active users'
-    value={data?.activeUsers.Gauge.value.toString()}
-    points={data?.activeUsers.Sparkline}
-    trend={data?.activeUsers.Trend.value}
-    sparklineColor={getColor('primary')}
+    title='Active meetings'
+    value={data?.activeMeetings.Gauge.value.toString()}
+    points={data?.activeMeetings.Sparkline}
+    trend={data?.activeMeetings.Trend.value}
+    sparklineColor={getColor('cyan')}
     loading={loading}
   />
 }

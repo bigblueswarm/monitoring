@@ -14,8 +14,6 @@ github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmV
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
-github.com/bigblueswarm/bigblueswarm/v2 v2.2.0 h1:c12tRtY5kl3F3Y6gY0W51fuNHgJ8K3LXzZOJPbCdkCs=
-github.com/bigblueswarm/bigblueswarm/v2 v2.2.0/go.mod h1:MgUKXAMzQDSVwKLXI8Y/DHgBAtkvBuCv1FzSkZ1o0wg=
 github.com/bigblueswarm/bigblueswarm/v2 v2.2.1 h1:4P/CfqvkJPBxc8v6GyOyqbrizNNYsuDqzJXoUjSzxmo=
 github.com/bigblueswarm/bigblueswarm/v2 v2.2.1/go.mod h1:MgUKXAMzQDSVwKLXI8Y/DHgBAtkvBuCv1FzSkZ1o0wg=
 github.com/bigblueswarm/test_utils v0.0.0-20221130142439-0fd13167b78a h1:xsrFuUx0wlTsEs0zJVmGcZfP2pP07AYGWZQdboF5sAU=

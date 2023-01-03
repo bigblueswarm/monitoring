@@ -42,7 +42,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	ActiveUsersStat struct {
+	ActiveMetricStat struct {
 		Gauge     func(childComplexity int) int
 		Sparkline func(childComplexity int) int
 		Trend     func(childComplexity int) int
@@ -58,7 +58,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		ActiveUsers func(childComplexity int, start *string, stop *string, every *string) int
+		ActiveMeetings func(childComplexity int, start *string, stop *string) int
+		ActiveUsers    func(childComplexity int, start *string, stop *string) int
 	}
 
 	Trend struct {
@@ -67,7 +68,8 @@ type ComplexityRoot struct {
 }
 
 type QueryResolver interface {
-	ActiveUsers(ctx context.Context, start *string, stop *string, every *string) (*model.ActiveUsersStat, error)
+	ActiveUsers(ctx context.Context, start *string, stop *string) (*model.ActiveMetricStat, error)
+	ActiveMeetings(ctx context.Context, start *string, stop *string) (*model.ActiveMetricStat, error)
 }
 
 type executableSchema struct {
@@ -85,26 +87,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "ActiveUsersStat.Gauge":
-		if e.complexity.ActiveUsersStat.Gauge == nil {
+	case "ActiveMetricStat.Gauge":
+		if e.complexity.ActiveMetricStat.Gauge == nil {
 			break
 		}
 
-		return e.complexity.ActiveUsersStat.Gauge(childComplexity), true
+		return e.complexity.ActiveMetricStat.Gauge(childComplexity), true
 
-	case "ActiveUsersStat.Sparkline":
-		if e.complexity.ActiveUsersStat.Sparkline == nil {
+	case "ActiveMetricStat.Sparkline":
+		if e.complexity.ActiveMetricStat.Sparkline == nil {
 			break
 		}
 
-		return e.complexity.ActiveUsersStat.Sparkline(childComplexity), true
+		return e.complexity.ActiveMetricStat.Sparkline(childComplexity), true
 
-	case "ActiveUsersStat.Trend":
-		if e.complexity.ActiveUsersStat.Trend == nil {
+	case "ActiveMetricStat.Trend":
+		if e.complexity.ActiveMetricStat.Trend == nil {
 			break
 		}
 
-		return e.complexity.ActiveUsersStat.Trend(childComplexity), true
+		return e.complexity.ActiveMetricStat.Trend(childComplexity), true
 
 	case "Gauge.value":
 		if e.complexity.Gauge.Value == nil {
@@ -127,6 +129,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Point.Value(childComplexity), true
 
+	case "Query.activeMeetings":
+		if e.complexity.Query.ActiveMeetings == nil {
+			break
+		}
+
+		args, err := ec.field_Query_activeMeetings_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ActiveMeetings(childComplexity, args["start"].(*string), args["stop"].(*string)), true
+
 	case "Query.activeUsers":
 		if e.complexity.Query.ActiveUsers == nil {
 			break
@@ -137,7 +151,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ActiveUsers(childComplexity, args["start"].(*string), args["stop"].(*string), args["every"].(*string)), true
+		return e.complexity.Query.ActiveUsers(childComplexity, args["start"].(*string), args["stop"].(*string)), true
 
 	case "Trend.value":
 		if e.complexity.Trend.Value == nil {
@@ -198,8 +212,8 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema/cluster.graphql", Input: `# ActiveUsersStats represents the active user card in overview graph
-type ActiveUsersStat {
+	{Name: "../schema/cluster.graphql", Input: `# ActiveMetricStat represents and active card in overview graph
+type ActiveMetricStat {
     Gauge: Gauge
     Trend: Trend
     Sparkline: [Point]
@@ -207,7 +221,8 @@ type ActiveUsersStat {
 
 # Cluster query manage 
 type Query {
-    activeUsers(start: String, stop: String, every: String): ActiveUsersStat
+    activeUsers(start: String, stop: String): ActiveMetricStat
+    activeMeetings(start: String, stop: String): ActiveMetricStat
 }`, BuiltIn: false},
 	{Name: "../schema/metrics.graphql", Input: `# Gauge represents a value metric
 type Gauge {
@@ -246,6 +261,30 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_activeMeetings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["start"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["start"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["stop"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stop"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["stop"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_activeUsers_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -267,15 +306,6 @@ func (ec *executionContext) field_Query_activeUsers_args(ctx context.Context, ra
 		}
 	}
 	args["stop"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["every"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("every"))
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["every"] = arg2
 	return args, nil
 }
 
@@ -317,8 +347,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _ActiveUsersStat_Gauge(ctx context.Context, field graphql.CollectedField, obj *model.ActiveUsersStat) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ActiveUsersStat_Gauge(ctx, field)
+func (ec *executionContext) _ActiveMetricStat_Gauge(ctx context.Context, field graphql.CollectedField, obj *model.ActiveMetricStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ActiveMetricStat_Gauge(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -342,12 +372,12 @@ func (ec *executionContext) _ActiveUsersStat_Gauge(ctx context.Context, field gr
 	}
 	res := resTmp.(*model.Gauge)
 	fc.Result = res
-	return ec.marshalOGauge2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐGauge(ctx, field.Selections, res)
+	return ec.marshalOGauge2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐGauge(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ActiveUsersStat_Gauge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ActiveMetricStat_Gauge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ActiveUsersStat",
+		Object:     "ActiveMetricStat",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -362,8 +392,8 @@ func (ec *executionContext) fieldContext_ActiveUsersStat_Gauge(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _ActiveUsersStat_Trend(ctx context.Context, field graphql.CollectedField, obj *model.ActiveUsersStat) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ActiveUsersStat_Trend(ctx, field)
+func (ec *executionContext) _ActiveMetricStat_Trend(ctx context.Context, field graphql.CollectedField, obj *model.ActiveMetricStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ActiveMetricStat_Trend(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -387,12 +417,12 @@ func (ec *executionContext) _ActiveUsersStat_Trend(ctx context.Context, field gr
 	}
 	res := resTmp.(*model.Trend)
 	fc.Result = res
-	return ec.marshalOTrend2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐTrend(ctx, field.Selections, res)
+	return ec.marshalOTrend2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐTrend(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ActiveUsersStat_Trend(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ActiveMetricStat_Trend(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ActiveUsersStat",
+		Object:     "ActiveMetricStat",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -407,8 +437,8 @@ func (ec *executionContext) fieldContext_ActiveUsersStat_Trend(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _ActiveUsersStat_Sparkline(ctx context.Context, field graphql.CollectedField, obj *model.ActiveUsersStat) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ActiveUsersStat_Sparkline(ctx, field)
+func (ec *executionContext) _ActiveMetricStat_Sparkline(ctx context.Context, field graphql.CollectedField, obj *model.ActiveMetricStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ActiveMetricStat_Sparkline(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -432,12 +462,12 @@ func (ec *executionContext) _ActiveUsersStat_Sparkline(ctx context.Context, fiel
 	}
 	res := resTmp.([]*model.Point)
 	fc.Result = res
-	return ec.marshalOPoint2ᚕᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx, field.Selections, res)
+	return ec.marshalOPoint2ᚕᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ActiveUsersStat_Sparkline(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ActiveMetricStat_Sparkline(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ActiveUsersStat",
+		Object:     "ActiveMetricStat",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -591,7 +621,7 @@ func (ec *executionContext) _Query_activeUsers(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ActiveUsers(rctx, fc.Args["start"].(*string), fc.Args["stop"].(*string), fc.Args["every"].(*string))
+		return ec.resolvers.Query().ActiveUsers(rctx, fc.Args["start"].(*string), fc.Args["stop"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -600,9 +630,9 @@ func (ec *executionContext) _Query_activeUsers(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.ActiveUsersStat)
+	res := resTmp.(*model.ActiveMetricStat)
 	fc.Result = res
-	return ec.marshalOActiveUsersStat2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐActiveUsersStat(ctx, field.Selections, res)
+	return ec.marshalOActiveMetricStat2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐActiveMetricStat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_activeUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -614,13 +644,13 @@ func (ec *executionContext) fieldContext_Query_activeUsers(ctx context.Context, 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "Gauge":
-				return ec.fieldContext_ActiveUsersStat_Gauge(ctx, field)
+				return ec.fieldContext_ActiveMetricStat_Gauge(ctx, field)
 			case "Trend":
-				return ec.fieldContext_ActiveUsersStat_Trend(ctx, field)
+				return ec.fieldContext_ActiveMetricStat_Trend(ctx, field)
 			case "Sparkline":
-				return ec.fieldContext_ActiveUsersStat_Sparkline(ctx, field)
+				return ec.fieldContext_ActiveMetricStat_Sparkline(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ActiveUsersStat", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type ActiveMetricStat", field.Name)
 		},
 	}
 	defer func() {
@@ -631,6 +661,66 @@ func (ec *executionContext) fieldContext_Query_activeUsers(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_activeUsers_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_activeMeetings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_activeMeetings(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ActiveMeetings(rctx, fc.Args["start"].(*string), fc.Args["stop"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.ActiveMetricStat)
+	fc.Result = res
+	return ec.marshalOActiveMetricStat2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐActiveMetricStat(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_activeMeetings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "Gauge":
+				return ec.fieldContext_ActiveMetricStat_Gauge(ctx, field)
+			case "Trend":
+				return ec.fieldContext_ActiveMetricStat_Trend(ctx, field)
+			case "Sparkline":
+				return ec.fieldContext_ActiveMetricStat_Sparkline(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ActiveMetricStat", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_activeMeetings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2588,27 +2678,27 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** object.gotpl ****************************
 
-var activeUsersStatImplementors = []string{"ActiveUsersStat"}
+var activeMetricStatImplementors = []string{"ActiveMetricStat"}
 
-func (ec *executionContext) _ActiveUsersStat(ctx context.Context, sel ast.SelectionSet, obj *model.ActiveUsersStat) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, activeUsersStatImplementors)
+func (ec *executionContext) _ActiveMetricStat(ctx context.Context, sel ast.SelectionSet, obj *model.ActiveMetricStat) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, activeMetricStatImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("ActiveUsersStat")
+			out.Values[i] = graphql.MarshalString("ActiveMetricStat")
 		case "Gauge":
 
-			out.Values[i] = ec._ActiveUsersStat_Gauge(ctx, field, obj)
+			out.Values[i] = ec._ActiveMetricStat_Gauge(ctx, field, obj)
 
 		case "Trend":
 
-			out.Values[i] = ec._ActiveUsersStat_Trend(ctx, field, obj)
+			out.Values[i] = ec._ActiveMetricStat_Trend(ctx, field, obj)
 
 		case "Sparkline":
 
-			out.Values[i] = ec._ActiveUsersStat_Sparkline(ctx, field, obj)
+			out.Values[i] = ec._ActiveMetricStat_Sparkline(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -2704,6 +2794,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_activeUsers(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "activeMeetings":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_activeMeetings(ctx, field)
 				return res
 			}
 
@@ -3363,11 +3473,11 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOActiveUsersStat2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐActiveUsersStat(ctx context.Context, sel ast.SelectionSet, v *model.ActiveUsersStat) graphql.Marshaler {
+func (ec *executionContext) marshalOActiveMetricStat2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐActiveMetricStat(ctx context.Context, sel ast.SelectionSet, v *model.ActiveMetricStat) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._ActiveUsersStat(ctx, sel, v)
+	return ec._ActiveMetricStat(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -3412,14 +3522,14 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalOGauge2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐGauge(ctx context.Context, sel ast.SelectionSet, v *model.Gauge) graphql.Marshaler {
+func (ec *executionContext) marshalOGauge2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐGauge(ctx context.Context, sel ast.SelectionSet, v *model.Gauge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Gauge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPoint2ᚕᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v []*model.Point) graphql.Marshaler {
+func (ec *executionContext) marshalOPoint2ᚕᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v []*model.Point) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3446,7 +3556,7 @@ func (ec *executionContext) marshalOPoint2ᚕᚖgithubᚗcomᚋb3lbᚋmonitoring
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOPoint2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx, sel, v[i])
+			ret[i] = ec.marshalOPoint2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3460,7 +3570,7 @@ func (ec *executionContext) marshalOPoint2ᚕᚖgithubᚗcomᚋb3lbᚋmonitoring
 	return ret
 }
 
-func (ec *executionContext) marshalOPoint2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v *model.Point) graphql.Marshaler {
+func (ec *executionContext) marshalOPoint2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v *model.Point) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3483,7 +3593,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOTrend2ᚖgithubᚗcomᚋb3lbᚋmonitoringᚋpkgᚋmodelᚐTrend(ctx context.Context, sel ast.SelectionSet, v *model.Trend) graphql.Marshaler {
+func (ec *executionContext) marshalOTrend2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐTrend(ctx context.Context, sel ast.SelectionSet, v *model.Trend) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
