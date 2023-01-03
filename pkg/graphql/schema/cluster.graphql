@@ -9,4 +9,5 @@ type ActiveMetricStat {
 type Query {
     activeUsers(start: String, stop: String): ActiveMetricStat
     activeMeetings(start: String, stop: String): ActiveMetricStat
+    activeRecordings(start: String, stop: String): ActiveMetricStat
 }

@@ -2,11 +2,9 @@ import React, { FunctionComponent } from 'react'
 
 import { Page } from '../../components/page/page'
 
-import {
-  ActiveUsers
-} from '../../containers/active-users'
-
+import { ActiveUsers } from '../../containers/active-users'
 import { ActiveMeetings } from '../../containers/active-meetings'
+import { ActiveRecordings } from '../../containers/active-recordings'
 
 export const Overview: FunctionComponent = () => (
   <Page.Wrapper>
@@ -17,6 +15,9 @@ export const Overview: FunctionComponent = () => (
       </div>
       <div className='col-sm-6 col-lg-4'>
         <ActiveMeetings.CardWithSparkline />
+      </div>
+      <div className='col-sm-6 col-lg-4'>
+        <ActiveRecordings.CardWithSparkline />
       </div>
     </Page.Body>
   </Page.Wrapper>

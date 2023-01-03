@@ -59,6 +59,30 @@ func (r *queryResolver) ActiveMeetings(ctx context.Context, start *string, stop 
 	}, nil
 }
 
+// ActiveRecordings is the resolver for the activeRecordings field.
+func (r *queryResolver) ActiveRecordings(ctx context.Context, start *string, stop *string) (*model.ActiveMetricStat, error) {
+	gauge, err := r.ClusterService.GetRecordingsCount()
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve meeting count gauge: %s", err)
+	}
+
+	sparkline, err := r.ClusterService.GetRecoringTimeserie(*start, *stop, "45s")
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve meetings count sparkline: %s", err)
+	}
+
+	trend, err := r.ClusterService.GetRecordingTrend(*start, *stop, r.ClusterService.GetAggregationInterval())
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve meetings trend: %s", err)
+	}
+
+	return &model.ActiveMetricStat{
+		Gauge:     gauge,
+		Trend:     trend,
+		Sparkline: sparkline,
+	}, nil
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 

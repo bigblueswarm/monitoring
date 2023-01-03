@@ -58,8 +58,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		ActiveMeetings func(childComplexity int, start *string, stop *string) int
-		ActiveUsers    func(childComplexity int, start *string, stop *string) int
+		ActiveMeetings   func(childComplexity int, start *string, stop *string) int
+		ActiveRecordings func(childComplexity int, start *string, stop *string) int
+		ActiveUsers      func(childComplexity int, start *string, stop *string) int
 	}
 
 	Trend struct {
@@ -70,6 +71,7 @@ type ComplexityRoot struct {
 type QueryResolver interface {
 	ActiveUsers(ctx context.Context, start *string, stop *string) (*model.ActiveMetricStat, error)
 	ActiveMeetings(ctx context.Context, start *string, stop *string) (*model.ActiveMetricStat, error)
+	ActiveRecordings(ctx context.Context, start *string, stop *string) (*model.ActiveMetricStat, error)
 }
 
 type executableSchema struct {
@@ -140,6 +142,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ActiveMeetings(childComplexity, args["start"].(*string), args["stop"].(*string)), true
+
+	case "Query.activeRecordings":
+		if e.complexity.Query.ActiveRecordings == nil {
+			break
+		}
+
+		args, err := ec.field_Query_activeRecordings_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ActiveRecordings(childComplexity, args["start"].(*string), args["stop"].(*string)), true
 
 	case "Query.activeUsers":
 		if e.complexity.Query.ActiveUsers == nil {
@@ -223,7 +237,9 @@ type ActiveMetricStat {
 type Query {
     activeUsers(start: String, stop: String): ActiveMetricStat
     activeMeetings(start: String, stop: String): ActiveMetricStat
-}`, BuiltIn: false},
+    activeRecordings(start: String, stop: String): ActiveMetricStat
+}
+`, BuiltIn: false},
 	{Name: "../schema/metrics.graphql", Input: `# Gauge represents a value metric
 type Gauge {
     value: Float
@@ -262,6 +278,30 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 }
 
 func (ec *executionContext) field_Query_activeMeetings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["start"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("start"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["start"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["stop"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stop"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["stop"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_activeRecordings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -721,6 +761,66 @@ func (ec *executionContext) fieldContext_Query_activeMeetings(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_activeMeetings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_activeRecordings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_activeRecordings(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ActiveRecordings(rctx, fc.Args["start"].(*string), fc.Args["stop"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.ActiveMetricStat)
+	fc.Result = res
+	return ec.marshalOActiveMetricStat2ᚖgithubᚗcomᚋbigblueswarmᚋmonitoringᚋpkgᚋmodelᚐActiveMetricStat(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_activeRecordings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "Gauge":
+				return ec.fieldContext_ActiveMetricStat_Gauge(ctx, field)
+			case "Trend":
+				return ec.fieldContext_ActiveMetricStat_Trend(ctx, field)
+			case "Sparkline":
+				return ec.fieldContext_ActiveMetricStat_Sparkline(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ActiveMetricStat", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_activeRecordings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2814,6 +2914,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_activeMeetings(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "activeRecordings":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_activeRecordings(ctx, field)
 				return res
 			}
 

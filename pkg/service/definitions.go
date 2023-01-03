@@ -6,9 +6,12 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2/api"
 )
 
-const bigbluebuttonMeetings = "bigbluebutton_meetings"
-const participantCount = "participant_count"
-const activeMeetings = "active_meetings"
+const (
+	bigbluebuttonMeetings = "bigbluebutton_meetings"
+	participantCount      = "participant_count"
+	activeMeetings        = "active_meetings"
+	activeRecordings      = "active_recordings"
+)
 
 // IClusterService is the interface that manage cluster data
 type IClusterService interface {
@@ -24,6 +27,12 @@ type IClusterService interface {
 	GetMeetingTimeserie(start string, stop string, every string) ([]*model.Point, error)
 	// GetMeetingTrend retrieve active meetings trend in the cluster
 	GetMeetingTrend(start string, stop string, every string) (*model.Trend, error)
+	// GetRecordingsCount retrieve actives meetings in the cluster
+	GetRecordingsCount() (*model.Gauge, error)
+	// GetRecoringTimeserie retrieve active meetings in the cluster as a timeserie
+	GetRecoringTimeserie(start string, stop string, every string) ([]*model.Point, error)
+	// GetRecordingTrend retrieve active meetings trend in the cluster
+	GetRecordingTrend(start string, stop string, every string) (*model.Trend, error)
 	// GetAggregationInterval returns the aggregation interval configured in balancer
 	GetAggregationInterval() string
 }
