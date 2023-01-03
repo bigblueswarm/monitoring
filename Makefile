@@ -77,5 +77,5 @@ cluster.consul:
 	@make -f ./scripts/Makefile cluster.consul
 
 #cluster.b3lb: @ sta^rt development cluster using b3lb image
-cluster.b3lb:
-	@make -f ./scripts/Makefile cluster.b3lb
+cluster.bigblueswarm:
+	@make -f ./scripts/Makefile cluster.bigblueswarm
