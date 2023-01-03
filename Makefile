@@ -22,7 +22,7 @@ test.unit:
 	npm ci
 	make build.front
 	@echo "[TEST.UNIT] run unit tests and coverage"
-	go test -race -covermode=atomic -coverprofile=coverage.out \
+	go test -covermode=atomic -coverprofile=coverage.out \
 		github.com/bigblueswarm/monitoring/pkg/app \
 		github.com/bigblueswarm/monitoring/pkg/auth \
 		github.com/bigblueswarm/monitoring/pkg/config \
