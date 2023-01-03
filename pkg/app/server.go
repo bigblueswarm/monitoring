@@ -66,7 +66,7 @@ func NewServer(config *config.Config) *Server {
 		Router:         gin.Default(),
 		Config:         config,
 		AuthProvider:   auth.NewProvider(rc, *config.Monitoring.Auth),
-		clusterService: service.NewClusterService(ic, config.IDB.Organization, config.IDB.Bucket, *config.Monitoring.AggregationInterval),
+		clusterService: service.NewClusterService(ic, config.IDB.Organization, config.IDB.Bucket, config.Balancer.AggregationInterval),
 	}
 }
 
