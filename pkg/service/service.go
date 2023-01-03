@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/b3lb/monitoring/pkg/model"
+	"github.com/bigblueswarm/monitoring/pkg/model"
 )
 
 func (s *Service) getGaugeValue(measurement string, field string) (*model.Gauge, error) {

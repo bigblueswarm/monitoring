@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/SLedunois/b3lb/v2/pkg/config"
-	"github.com/b3lb/test_utils/pkg/test"
+	"github.com/bigblueswarm/bigblueswarm/v2/pkg/config"
+	"github.com/bigblueswarm/test_utils/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultConfigPath(t *testing.T) {
-	t.Run("default config path should return $HOME/.b3lb/monitoring.b3lb.yaml", func(t *testing.T) {
-		assert.Equal(t, "$HOME/.b3lb/monitoring.b3lb.yaml", DefaultConfigPath())
+	t.Run("default config path should return $HOME/.bigblueswarm/monitoring.bbs.yaml", func(t *testing.T) {
+		assert.Equal(t, "$HOME/.bigblueswarm/monitoring.bbs.yaml", DefaultConfigPath())
 	})
 }
 

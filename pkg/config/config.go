@@ -4,10 +4,10 @@ package config
 import (
 	"fmt"
 
-	"github.com/SLedunois/b3lb/v2/pkg/config"
+	"github.com/bigblueswarm/bigblueswarm/v2/pkg/config"
 )
 
-const defaultConfigFileName = "monitoring.b3lb.yaml"
+const defaultConfigFileName = "monitoring.bbs.yaml"
 
 // DefaultConfigPath return the default config path file
 func DefaultConfigPath() string {

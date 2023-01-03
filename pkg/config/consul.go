@@ -5,19 +5,21 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/SLedunois/b3lb/v2/pkg/config"
+	"github.com/bigblueswarm/bigblueswarm/v2/pkg/config"
 	"github.com/hashicorp/consul/api"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
 func getConsulKV(path string) (*api.KV, error) {
-	defaultConf := api.DefaultConfig()
-	defaultConf.Address = strings.ReplaceAll(path, config.ConsulPrefix, "")
-	client, err := api.NewClient(defaultConf)
+	conf := api.DefaultConfig()
+	conf.Address = strings.ReplaceAll(path, config.ConsulPrefix, "")
+	client, err := api.NewClient(conf)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve KV api: %s", err)
 	}
+
+	config.SetConsulConfig(conf)
 
 	return client.KV(), nil
 
@@ -29,12 +31,12 @@ func loadConfigFromConsul(path string) (*Config, error) {
 		return nil, err
 	}
 
-	b3lbConf := &config.Config{}
-	if err := b3lbConf.LoadInfluxDBConf(kv); err != nil {
+	bbsConf := &config.Config{}
+	if err := bbsConf.LoadInfluxDBConf(kv); err != nil {
 		return nil, fmt.Errorf("failed to load influxdb configuration from consul: %s", err)
 	}
 
-	if err := b3lbConf.LoadRedisConf(kv); err != nil {
+	if err := bbsConf.LoadRedisConf(kv); err != nil {
 		return nil, fmt.Errorf("failed to load redis configuration from consul: %s", err)
 	}
 
@@ -44,8 +46,8 @@ func loadConfigFromConsul(path string) (*Config, error) {
 	}
 
 	return &Config{
-		IDB:        b3lbConf.IDB,
-		RDB:        b3lbConf.RDB,
+		IDB:        bbsConf.IDB,
+		RDB:        bbsConf.RDB,
 		Monitoring: mc,
 	}, nil
 }
@@ -63,7 +65,7 @@ func loadMonitoringConfig(kv *api.KV) (*MonitoringConfig, error) {
 		return nil, err
 	}
 
-	err = config.WatchChanges(key, func(value []byte) {
+	err = config.WatchChanges(log.WithField("key", key), key, func(value []byte) {
 		if err := yaml.Unmarshal(value, &conf); err != nil {
 			log.Error(fmt.Errorf("unable to parse new config value: %s", err))
 			return

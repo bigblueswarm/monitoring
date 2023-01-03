@@ -6,7 +6,7 @@ jobs:
     name: Unit tests
     steps:
       - uses: actions/checkout@v2
-      - name: Get b3lb scripts
+      - name: Get bigblueswarm scripts
         run: make scripts
       - name: Run test and coverage
         run: make test.unit

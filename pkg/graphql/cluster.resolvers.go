@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/b3lb/monitoring/pkg/graphql/generated"
-	"github.com/b3lb/monitoring/pkg/model"
-	"github.com/b3lb/monitoring/pkg/pointer"
+	"github.com/bigblueswarm/monitoring/pkg/graphql/generated"
+	"github.com/bigblueswarm/monitoring/pkg/model"
+	"github.com/bigblueswarm/monitoring/pkg/pointer"
 )
 
 // ActiveUsers is the resolver for the activeUsers field.

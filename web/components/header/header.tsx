@@ -12,7 +12,7 @@ export const Header: FunctionComponent = () => (
             </button>
             <h1 className="navbar-brand d-none-navbar-horizontal pe-0 pe-md-3">
                 <img src={Logo} width="110" height="32" alt="Tabler" className="navbar-brand-image" />
-                <span className="m-2">b3lb</span>
+                <span className="m-2">BigBlueSwarm</span>
             </h1>
             <div className="navbar-nav flex-row order-md-last align-items-center">
                 <a href="/auth/logout" className="btn btn-indigo h-33">

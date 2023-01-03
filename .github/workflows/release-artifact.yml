@@ -3,7 +3,7 @@ on:
   release:
     types: [published]
 env:
-  BINARY_NAME: b3lb-monitoring
+  BINARY_NAME: bbs-monitoring
   CMD_PATH: ./cmd/monitoring
 jobs:
   releases-matrix:

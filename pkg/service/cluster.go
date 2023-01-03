@@ -2,7 +2,7 @@
 package service
 
 import (
-	"github.com/b3lb/monitoring/pkg/model"
+	"github.com/bigblueswarm/monitoring/pkg/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
@@ -10,8 +10,8 @@ import (
 func NewClusterService(idb influxdb2.Client, org string, b string, a string) IClusterService {
 	return &ClusterService{
 		Service: Service{
-			client: idb.QueryAPI(org),
-			bucket: b,
+			client:              idb.QueryAPI(org),
+			bucket:              b,
 			aggregationInterval: a,
 		},
 	}
