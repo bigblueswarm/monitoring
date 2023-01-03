@@ -2,7 +2,7 @@
 
 package model
 
-type ActiveUsersStat struct {
+type ActiveMetricStat struct {
 	Gauge     *Gauge   `json:"Gauge"`
 	Trend     *Trend   `json:"Trend"`
 	Sparkline []*Point `json:"Sparkline"`
